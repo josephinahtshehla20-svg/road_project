@@ -1,0 +1,12 @@
+node_modules/
+.next/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+*.csv
+*.zip
+*.pdf
+/app/
+/model.joblib
+/road_project_step*/
+.env
