@@ -19,6 +19,7 @@ services:
     container_name: road_backend
     environment:
       DATABASE_URL: postgresql+psycopg2://road:road@db:5432/roaddb
+      SECRET_KEY: local-dev-secret-change-me
     depends_on:
       db:
         condition: service_healthy

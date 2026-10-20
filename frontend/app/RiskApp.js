@@ -30,18 +30,59 @@ export default function RiskApp({ api }) {
   const [history, setHistory] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [token, setToken] = useState(null);
+  const [me, setMe] = useState("");
+  const [authForm, setAuthForm] = useState({ email: "", password: "" });
+  const [authError, setAuthError] = useState("");
 
   const set = (key, value) => setForm((f) => ({ ...f, [key]: value }));
 
+  function logout() {
+    localStorage.removeItem("road_token");
+    localStorage.removeItem("road_email");
+    setToken(null);
+    setMe("");
+    setHistory([]);
+  }
+
   async function loadHistory() {
+    if (!token) { setHistory([]); return; }
     try {
-      const r = await fetch(`${API}/history?limit=5`);
+      const r = await fetch(`${API}/history?limit=5`, { headers: { Authorization: `Bearer ${token}` } });
+      if (r.status === 401) { logout(); return; }
       if (r.ok) setHistory(await r.json());
     } catch {
-      /* history is optional, ignore errors here */
+      /* history is optional, ignore network errors here */
     }
   }
-  useEffect(() => { loadHistory(); }, []);
+  useEffect(() => {
+    const t = localStorage.getItem("road_token");
+    if (t) { setToken(t); setMe(localStorage.getItem("road_email") || ""); }
+  }, []);
+  useEffect(() => { loadHistory(); }, [token]);
+
+  async function submitAuth(mode) {
+    setAuthError("");
+    try {
+      const r = await fetch(`${API}/auth/${mode}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(authForm),
+      });
+      const j = await r.json();
+      if (!r.ok) {
+        setAuthError(typeof j.detail === "string" ? j.detail : "Check your email and use a password of 8 to 72 characters.");
+        return;
+      }
+      localStorage.setItem("road_token", j.access_token);
+      localStorage.setItem("road_email", j.email);
+      setToken(j.access_token);
+      setMe(j.email);
+      setAuthForm({ email: "", password: "" });
+    } catch {
+      setAuthError("Could not reach the backend. Check that it is running.");
+    }
+  }
 
   async function predict(data) {
     setLoading(true);
@@ -49,9 +90,10 @@ export default function RiskApp({ api }) {
     try {
       const r = await fetch(`${API}/predict`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: token ? { "Content-Type": "application/json", Authorization: `Bearer ${token}` } : { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
+      if (r.status === 401) { logout(); throw new Error("Your session expired. Please log in again, then predict again."); }
       if (!r.ok) throw new Error("The server rejected these inputs. Check the values.");
       setResult(await r.json());
       loadHistory();
@@ -148,6 +190,7 @@ export default function RiskApp({ api }) {
                   );
                 })}
               </ul>
+              <p className="note">{result.saved ? "Saved to your history." : "Not saved. Log in below to keep a history of your predictions."}</p>
               <p className="note">Bars compare each input with a typical road (45 mph, clear weather, daylight, 1 past accident). Red raises risk, green lowers it.</p>
             </div>
           )}
@@ -155,9 +198,35 @@ export default function RiskApp({ api }) {
       </div>
 
       <section className="card history">
-        <h2>Recent predictions (saved in PostgreSQL)</h2>
-        {history.length === 0 ? (
-          <p className="empty">No saved predictions yet.</p>
+        <div className="histhead">
+          <h2>{token ? "My history (saved in PostgreSQL)" : "Log in to keep a history"}</h2>
+          {token && (
+            <div className="who"><span>{me}</span><button type="button" className="ex" onClick={logout}>Log out</button></div>
+          )}
+        </div>
+        {!token ? (
+          <form onSubmit={(e) => { e.preventDefault(); submitAuth("login"); }}>
+            <p className="empty">The predictor is open to everyone. Create an account to save your predictions and see only your own.</p>
+            <div className="row">
+              <div className="field">
+                <label htmlFor="em">Email</label>
+                <input id="em" type="email" autoComplete="email" required value={authForm.email}
+                  onChange={(e) => setAuthForm({ ...authForm, email: e.target.value })} />
+              </div>
+              <div className="field">
+                <label htmlFor="pw">Password (8 to 72 characters)</label>
+                <input id="pw" type="password" autoComplete="current-password" required minLength={8} maxLength={72} value={authForm.password}
+                  onChange={(e) => setAuthForm({ ...authForm, password: e.target.value })} />
+              </div>
+            </div>
+            <div className="authbtns">
+              <button type="submit" className="primary small">Log in</button>
+              <button type="button" className="ex" onClick={() => submitAuth("register")}>Create account</button>
+            </div>
+            {authError && <div className="err" role="alert">{authError}</div>}
+          </form>
+        ) : history.length === 0 ? (
+          <p className="empty">No saved predictions yet. Run a prediction and it will appear here.</p>
         ) : (
           <table>
             <thead><tr><th>Time</th><th>Road</th><th>Risk</th><th>Level</th></tr></thead>

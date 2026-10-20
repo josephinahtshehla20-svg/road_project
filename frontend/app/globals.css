@@ -11,7 +11,7 @@ h2{font-size:17px;margin:18px 0 10px}h3{font-size:16px;margin:22px 0 0}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
 label{font-size:14px;color:var(--mute)}
-select,input[type=number]{background:var(--asphalt);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:10px;font:inherit}
+select,input[type=number],input[type=email],input[type=password]{background:var(--asphalt);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:10px;font:inherit}
 input[type=range]{accent-color:var(--paint);width:100%}
 .checks{display:flex;flex-wrap:wrap;gap:8px 18px;margin-bottom:8px}
 .check{color:var(--text);display:flex;gap:8px;align-items:center}
@@ -37,3 +37,9 @@ button{font-family:inherit;cursor:pointer}
 table{width:100%;border-collapse:collapse;font-size:14px}
 th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}th{color:var(--mute);font-weight:600}
 @media(prefers-reduced-motion:reduce){.pin{transition:none}}
+
+.histhead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px}
+.histhead h2{margin:0 0 10px}
+.who{display:flex;align-items:center;gap:12px;color:var(--mute);font-size:14px}
+.authbtns{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:6px}
+.primary.small{width:auto;margin-top:0;padding:10px 26px;font-size:16px}
