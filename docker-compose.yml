@@ -20,6 +20,7 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg2://road:road@db:5432/roaddb
       SECRET_KEY: local-dev-secret-change-me
+      ADMIN_EMAIL: admin@roadsafe.local
     depends_on:
       db:
         condition: service_healthy

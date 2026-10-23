@@ -43,3 +43,13 @@ th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}th{co
 .who{display:flex;align-items:center;gap:12px;color:var(--mute);font-size:14px}
 .authbtns{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:6px}
 .primary.small{width:auto;margin-top:0;padding:10px 26px;font-size:16px}
+
+.tablewrap{overflow-x:auto}
+.notecell{white-space:nowrap}
+.notein{width:170px;background:var(--asphalt);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font:inherit;margin-right:6px}
+.hint{color:var(--mute);font-size:13px;margin-left:6px}
+.ex.danger{border-color:var(--sev);color:var(--sev)}
+.account,.admin{margin-top:24px}
+.account summary{cursor:pointer;font-weight:700}
+.account form{margin-top:12px}
+.admin h3{font-size:15px;margin:20px 0 6px}
